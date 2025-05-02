@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Leaflet Європа з даними</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    body, html { margin: 0; height: 100%; }
+    #map { height: 100%; width: 100%; }
+    .leaflet-popup-content { font-size: 14px; }
+    #monthSlider {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      background: white;
+      padding: 5px;
+      border-radius: 4px;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="monthSlider">
+    Місяць: 
+    <select id="monthSelect">
+      <option value="Січень">Січень</option>
+      <option value="Лютий">Лютий</option>
+    </select>
+  </div>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const data = {
+      "Січень": {
+        "DE": { lat: 51.1657, lon: 10.4515, value: 120000 },
+        "PL": { lat: 51.9194, lon: 19.1451, value: 95000 },
+        "SK": { lat: 48.6690, lon: 19.6990, value: 50000 }
+      },
+      "Лютий": {
+        "DE": { lat: 51.1657, lon: 10.4515, value: 110000 },
+        "PL": { lat: 51.9194, lon: 19.1451, value: 98000 },
+        "SK": { lat: 48.6690, lon: 19.6990, value: 52000 }
+      }
+    };
+
+    const map = L.map('map').setView([51, 14], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = [];
+
+    function updateMap(month) {
+      markers.forEach(marker => map.removeLayer(marker));
+      markers.length = 0;
+
+      const monthData = data[month];
+      for (const country in monthData) {
+        const { lat, lon, value } = monthData[country];
+        const marker = L.circleMarker([lat, lon], {
+          radius: 10,
+          fillColor: "#0077cc",
+          color: "#004499",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.8
+        }).bindPopup(`<b>${country}</b><br>Сума: $${value.toLocaleString()}`);
+        marker.addTo(map);
+        markers.push(marker);
+      }
+    }
+
+    document.getElementById('monthSelect').addEventListener('change', e => {
+      updateMap(e.target.value);
+    });
+
+    updateMap('Січень');
+  </script>
+</body>
+</html>
